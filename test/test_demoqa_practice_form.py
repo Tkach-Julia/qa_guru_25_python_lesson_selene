@@ -1,6 +1,7 @@
 import os
+from pathlib import Path
 
-from selene import browser, be, have
+from selene import browser, be, have, by
 
 
 def test_demoqa_practice_form():
@@ -22,12 +23,16 @@ def test_demoqa_practice_form():
     browser.element('#subjectsInput').type('Arts').press_enter()
     browser.element('#hobbies-checkbox-2').click()
     # Загрузить картинку из папки resources
-    file_path = os.path.abspath('resources/artGallery.png')
-    browser.element('#uploadPicture').send_keys(file_path)
+    file_path = (Path(__file__).parent.parent / 'resources/artGallery.png')
+    browser.element("#uploadPicture").send_keys(str(file_path.resolve()))
 
     browser.element('#currentAddress').type('город Москва, ул Проспект Мира, 97').press_enter()
-    # Не разобралась с выбором штата и города
-    # browser.element('#state').click()
+    # Выбрать штат и город
+    browser.element('#state').with_(timeout=browser.config.timeout * 2).click()
+    browser.element('#state').element(by.text("NCR")).click()
+
+    browser.element('#city').click()
+    browser.element('#city').element(by.text("Delhi")).click()
     # Кликаем на кнопку Submit
     browser.element('#submit').click()
 
@@ -43,5 +48,5 @@ def test_demoqa_practice_form():
     rows[5].all('td')[1].should(have.text('Arts'))
     rows[6].all('td')[1].should(have.text('Reading'))
     rows[7].all('td')[1].should(have.text('artGallery.png'))
-    rows[8].all('td')[1].should(have.text(''))
-    rows[9].all('td')[1].should(have.text(''))
+    rows[8].all('td')[1].should(have.text('город Москва, ул Проспект Мира, 97'))
+    rows[9].all('td')[1].should(have.text('NCR Delhi'))
